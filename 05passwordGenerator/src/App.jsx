@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react"
+import { useState, useCallback , useEffect, useRef} from "react"
 
 function App() {
    const [length, setLength] = useState(8);
@@ -6,6 +6,9 @@ function App() {
    const [isChar, setIsChar] = useState(false);
    const [password, setPassword] = useState("");
 
+   //ref hook
+   const passwordRef = useRef(null);
+  
    const passwordGenerator = useCallback(() => {
        let pass = "";
        let str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -14,17 +17,27 @@ function App() {
 
        for (let i = 1; i <= length; i++) {
          let charInd = Math.floor(Math.random() * str.length + 1);
-         pass = str.charAt(charInd);
+         pass += str.charAt(charInd);
         
        }
 
        setPassword(pass);
 
-   }, [length, isNum, isChar, setPassword])
+   }, [length, isNum, isChar, setPassword]);
+
+   const copyPassword = useCallback(() => {
+    passwordRef.current?.select();
+    passwordRef.current?.setSelectionRange(0,15);
+    window.navigator.clipboard.writeText(password)
+   }, [password])
+
+   useEffect(()=>{
+    passwordGenerator();
+   }, [length , isChar, isNum, passwordGenerator])
 
   return (
     <>
-      <div className="w-full max-w-md mx-auto text-orange-500 bg-gray-500 shadow-md rounded-lg px-4 my-8">
+      <div className="w-full max-w-md mx-auto text-black bg-gray-500 shadow-md rounded-lg px-4 my-8">
         <h1 className="text-white text-center my-2">Password Generator</h1>
             <div className="flex shadow rounded-lg mb-8 overflow-hidden ">
               <input 
@@ -33,9 +46,11 @@ function App() {
                 className="outline-none w-full py-1 px-3"
                 placeholder="password"
                 readOnly
+                ref={passwordRef}
               />
               <button 
-                className="outline-none bg-blue-800 text-white px-3 py-0.5 shrink-0"
+                onClick={copyPassword}
+                className="outline-none bg-blue-600 text-white px-3 py-0.5 shrink-0"
               >copy</button>
             </div>
             <div className="flex text-sm gap-x-2">
